@@ -74,7 +74,16 @@ def sentence1():
     (not A) or (not B) or C
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A=logic.Expr('A')
+    B=logic.Expr('B')
+    C=logic.Expr('C')
+    First= A | B
+    Second= ~A % (~B | C)
+    Third= logic.disjoin((~A), (~B), C) 
+
+    Final2 = logic.conjoin(First, Second, Third)
+    return Final2
+    #util.raiseNotDefined()
 
 def sentence2():
     """Returns a logic.Expr instance that encodes that the following expressions are all true.
@@ -85,7 +94,20 @@ def sentence2():
     (not D) implies C
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A=logic.Expr('A')
+    B=logic.Expr('B')
+    C=logic.Expr('C')
+    D=logic.Expr('D')
+
+    First= C % (B | D)
+    Second= A >> (~B & ~D)
+    Third= ~(B & ~C) >> A
+    Forth= ~D>>C
+
+
+    Final = logic.conjoin(First, Second, Third, Forth)
+    return Final
+    #util.raiseNotDefined()
 
 def sentence3():
     """Using the symbols WumpusAlive[1], WumpusAlive[0], WumpusBorn[0], and WumpusKilled[0],
@@ -100,7 +122,21 @@ def sentence3():
     The Wumpus is born at time 0.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    WumpusAlive0=logic.PropSymbolExpr('WumpusAlive',0)
+    WumpusAlive1=logic.PropSymbolExpr('WumpusAlive',1)
+    WumpusBorn0=logic.PropSymbolExpr('WumpusBorn',0)
+    WumpusKilled0=logic.PropSymbolExpr('WumpusKilled',0)
+    First= WumpusAlive1 %((WumpusAlive0 & ~WumpusKilled0) | (~WumpusAlive0 & WumpusBorn0))
+    Second= ~(WumpusAlive0 & WumpusBorn0)
+    Third= WumpusBorn0
+
+    Final = logic.conjoin(First, Second, Third)
+
+    findModel(Final)
+    return Final
+    
+
+    #util.raiseNotDefined()
 
 def modelToString(model):
     """Converts the model to a string for printing purposes. The keys of a model are 
@@ -122,7 +158,10 @@ def findModel(sentence):
     model if one exists. Otherwise, returns False.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    eso = logic.to_cnf(sentence)
+    tal = logic.pycoSAT(eso)
+
+    return tal
 
 def atLeastOne(literals):
     """
@@ -225,10 +264,14 @@ def foodLogicPlan(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
-# Abbreviations
-plp = positionLogicPlan
-flp = foodLogicPlan
-fglp = foodGhostLogicPlan
+# # Abbreviations
+# plp = positionLogicPlan
+# flp = foodLogicPlan
+# fglp = foodGhostLogicPlan
+
+sentence1()
+
+sentence2()
 
 # Sometimes the logic module uses pretty deep recursion on long expressions
 sys.setrecursionlimit(100000)
