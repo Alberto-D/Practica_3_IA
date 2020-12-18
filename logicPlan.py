@@ -182,9 +182,12 @@ def atLeastOne(literals):
     >>> print logic.pl_true(atleast1,model2)
     True
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    "*** YOUR CODE HERE ***"    
+    result = literals[0]
+    counter=len(literals)
+    for i in range(counter -1):
+        result= logic.disjoin(result, literals[i+1])
+    return result
 
 def atMostOne(literals) :
     """
@@ -193,7 +196,29 @@ def atMostOne(literals) :
     the expressions in the list is true.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    counter=len(literals)
+    listas=[]
+    ##Voy creando "listas" (conjuntos de A B C y D) en la que todos los elementos estan negados menos 1 y las meto en un array
+    for i in range(counter):
+        lista1= literals[i]
+        for j in range(counter):
+            if( i != j):
+                lista1 = logic.conjoin(lista1, ~literals[j])                    
+        listas.append(lista1)
+
+    ##Hago disjoin de todas las "listas" del array
+    final = listas[0]
+    for i in range(counter-1):
+        final=logic.disjoin(final, listas[i+1])
+    ##Creo y añado la ultima posibilidad, que todos sean false
+    lista2=~literals[j]
+    for i in range(counter-1):
+        lista2 = logic.conjoin(lista2, ~literals[i+1])
+    final= logic.disjoin(final, lista2)
+    print(final)
+    otro = logic.to_cnf(final)
+    print(otro)
+    return otro
 
 
 def exactlyOne(literals):
@@ -203,7 +228,22 @@ def exactlyOne(literals):
     the expressions in the list is true.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+   
+    counter=len(literals)
+    listas=[]
+    for i in range(counter):
+        lista1= literals[i]
+        for j in range(counter):
+            if( i != j):
+                lista1 = logic.conjoin(lista1, ~literals[j])                              
+        listas.append(lista1)
+    final = listas[0]
+    for i in range(counter-1):
+        final=logic.disjoin(final, listas[i+1])
+
+    return final
+                
+            
 
 
 def extractActionSequence(model, actions):
@@ -269,10 +309,13 @@ def foodLogicPlan(problem):
 # flp = foodLogicPlan
 # fglp = foodGhostLogicPlan
 
-sentence1()
 
-sentence2()
-
+A = logic.PropSymbolExpr('A');
+B = logic.PropSymbolExpr('B');
+C = logic.PropSymbolExpr('C');
+D = logic.PropSymbolExpr('D');
+symbols = [A, B, C, D]
+atMostOne(symbols)
 # Sometimes the logic module uses pretty deep recursion on long expressions
 sys.setrecursionlimit(100000)
     
