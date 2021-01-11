@@ -158,10 +158,10 @@ def findModel(sentence):
     model if one exists. Otherwise, returns False.
     """
     "*** YOUR CODE HERE ***"
-    eso = logic.to_cnf(sentence)
-    tal = logic.pycoSAT(eso)
+    to_cnf = logic.to_cnf(sentence)
+    final = logic.pycoSAT(to_cnf)
 
-    return tal
+    return final
 
 def atLeastOne(literals):
     """
@@ -197,28 +197,17 @@ def atMostOne(literals) :
     """
     "*** YOUR CODE HERE ***"
     counter=len(literals)
-    listas=[]
-    ##Voy creando "listas" (conjuntos de A B C y D) en la que todos los elementos estan negados menos 1 y las meto en un array
-    for i in range(counter):
-        lista1= literals[i]
-        for j in range(counter):
-            if( i != j):
-                lista1 = logic.conjoin(lista1, ~literals[j])                    
-        listas.append(lista1)
+    number_of_trues=0
+    A=logic.Expr('A')
+    for j in range(counter):
+        if(literals[j]==True):
+            number_of_trues+=1
 
-    ##Hago disjoin de todas las "listas" del array
-    final = listas[0]
-    for i in range(counter-1):
-        final=logic.disjoin(final, listas[i+1])
-    ##Creo y añado la ultima posibilidad, que todos sean false
-    lista2=~literals[j]
-    for i in range(counter-1):
-        lista2 = logic.conjoin(lista2, ~literals[i+1])
-    final= logic.disjoin(final, lista2)
-    print(final)
-    otro = logic.to_cnf(final)
-    print(otro)
-    return otro
+    if(number_of_trues>1):
+        to_return= A
+    else:
+        to_return=~A
+    return to_return
 
 
 def exactlyOne(literals):
@@ -228,22 +217,23 @@ def exactlyOne(literals):
     the expressions in the list is true.
     """
     "*** YOUR CODE HERE ***"
-   
-    counter=len(literals)
-    listas=[]
-    for i in range(counter):
-        lista1= literals[i]
-        for j in range(counter):
-            if( i != j):
-                lista1 = logic.conjoin(lista1, ~literals[j])                              
-        listas.append(lista1)
-    final = listas[0]
-    for i in range(counter-1):
-        final=logic.disjoin(final, listas[i+1])
+    
+    
+    
+    return logic.conjoin( atLeastOne(literals), atMostOne(literals) )
+                   
+def bubbleSort_and_parse(arr): 
+    #Sorts the array passed and makes a new one parsed (contains only the names, not the numbers)
+    n = len(arr) 
+    for i in range(n-1): 
+        for j in range(0, n-i-1): 
+            if int(logic.parseExpr(arr[j])[1]) > int(logic.parseExpr(arr[j+1])[1]) : 
+                arr[j], arr[j+1] = arr[j+1], arr[j]     
 
-    return final
-                
-            
+    sorted_and_parsed=[]
+    for i in range(n):
+        sorted_and_parsed.append(logic.parseExpr(arr[i])[0])
+    return sorted_and_parsed
 
 
 def extractActionSequence(model, actions):
@@ -259,7 +249,18 @@ def extractActionSequence(model, actions):
     ['West', 'South', 'North']
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    list_to_copy=[]
+    #Miro todos los elementos del modelo y me quedo con los que sean True, tras esto me quedo solo con los que estén en actions y los copio en un array para ordenarlos.
+    for i in model:
+        if(model.get(i)==True):
+            for j in actions:
+                if(logic.parseExpr(i)[0]==j):
+                    list_to_copy.append(i)
+            
+    #Uso bubble sort para ordenarlos ya que al ser tan pocos elementos la diferencia con otros algoritmos es minima
+    final_array = bubbleSort_and_parse(list_to_copy)
+    return final_array
+
 
 def pacmanSuccessorStateAxioms(x, y, t, walls_grid):
     """
@@ -268,7 +269,31 @@ def pacmanSuccessorStateAxioms(x, y, t, walls_grid):
     Current <==> (previous position at time t-1) & (took action to move to x, y)
     """
     "*** YOUR CODE HERE ***"
-    return logic.Expr('A') # Replace this with your expression
+    print("Estoy en ",x," e ",y, " en tiempo ", t)
+    ##como mucho hay 4 posibilidades: arriba abajo izquierda y derecha
+    
+    lista=[]
+    if(walls_grid[x][y+1]==False):
+        #significa que no hay una pared encima
+        temp=logic.PropSymbolExpr(pacman_str, x, y+1, t-1) & logic.PropSymbolExpr("South", t-1)
+        lista.append(temp)
+    if(walls_grid[x][y-1]==False):
+        #significa que no hay una pared debajo
+        temp=logic.PropSymbolExpr(pacman_str, x, y-1, t-1) & logic.PropSymbolExpr("North", t-1)
+        lista.append(temp)
+    if(walls_grid[x-1][y]==False):
+        #significa que no hay una pared a la iquierda
+        temp=logic.PropSymbolExpr(pacman_str, x-1, y, t-1) & logic.PropSymbolExpr("East", t-1)
+        lista.append(temp)
+    if(walls_grid[x+1][y]==False):
+        #significa que no hay una pared a la derecha
+        temp=logic.PropSymbolExpr(pacman_str, x+1, y, t-1)& logic.PropSymbolExpr("West", t-1)
+        lista.append(temp)
+
+    print(walls_grid)
+    final= logic.PropSymbolExpr(pacman_str, x, y, t) % (logic.disjoin(lista))
+    print(final)
+    return final # Replace this with your expression
 
 
 def positionLogicPlan(problem):
@@ -310,12 +335,48 @@ def foodLogicPlan(problem):
 # fglp = foodGhostLogicPlan
 
 
-A = logic.PropSymbolExpr('A');
-B = logic.PropSymbolExpr('B');
-C = logic.PropSymbolExpr('C');
-D = logic.PropSymbolExpr('D');
-symbols = [A, B, C, D]
-atMostOne(symbols)
+
+actions = ['North', 'South', 'East', 'West']
+    
+model = {    logic.PropSymbolExpr('South[0]'): True, 
+             logic.PropSymbolExpr('East[7]'): False,
+             logic.PropSymbolExpr('South[5]'): True,
+             logic.PropSymbolExpr('North[6]'): True,
+             logic.PropSymbolExpr('West[0]'): False, 
+             logic.PropSymbolExpr('West[7]'): True,
+             logic.PropSymbolExpr('South[8]'): True,
+             logic.PropSymbolExpr('East[1]'): False,
+             logic.PropSymbolExpr('East[10]'): True,
+             logic.PropSymbolExpr('North[11]'): True,
+             logic.PropSymbolExpr('South[2]'): False,
+             logic.PropSymbolExpr('West[3]'): True,
+             logic.PropSymbolExpr('South[4]'): True,
+             logic.PropSymbolExpr('West[5]'): False,
+             logic.PropSymbolExpr('East[6]'): False,
+             logic.PropSymbolExpr('North[4]'): False,
+             logic.PropSymbolExpr('North[8]'): False,
+             logic.PropSymbolExpr('North[9]'): True,
+             logic.PropSymbolExpr('East[3]'): False,
+             logic.PropSymbolExpr('North[0]'): False, 
+             logic.PropSymbolExpr('East[0]'): False, 
+             logic.PropSymbolExpr('West[1]'): True, 
+             logic.PropSymbolExpr('West[9]'): False,
+             logic.PropSymbolExpr('West[10]'): False,
+             logic.PropSymbolExpr('South[11]'): False,
+             logic.PropSymbolExpr('South[1]'): False, 
+             logic.PropSymbolExpr('North[1]'): False, 
+             logic.PropSymbolExpr('North[2]'): True,
+        }
+
+plan = extractActionSequence(model, actions)
 # Sometimes the logic module uses pretty deep recursion on long expressions
+print("Model sentence 1:")
+print(findModel(sentence1()))
+print("Model sentence 2:")
+print(findModel(sentence2()))
+print("Model sentence 3:")
+print(findModel(sentence3()))
+
+
 sys.setrecursionlimit(100000)
     
