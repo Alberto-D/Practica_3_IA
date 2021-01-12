@@ -208,8 +208,7 @@ def atMostOne(literals) :
     else:
         to_return=~A
     return to_return
-
-
+  
 def exactlyOne(literals):
     """
     Given a list of logic.Expr literals, return a single logic.Expr instance in 
