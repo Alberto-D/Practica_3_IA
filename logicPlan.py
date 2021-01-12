@@ -74,16 +74,17 @@ def sentence1():
     (not A) or (not B) or C
     """
     "*** YOUR CODE HERE ***"
-    A=logic.Expr('A')
-    B=logic.Expr('B')
-    C=logic.Expr('C')
+    # Declaro las tres variables a usar en la sentencia.
+    A= logic.Expr('A')
+    B= logic.Expr('B')
+    C= logic.Expr('C')
+    # Usando las variables declaradas creo las tres oraciones que pide el enunciado.
     First= A | B
     Second= ~A % (~B | C)
     Third= logic.disjoin((~A), (~B), C) 
-
-    Final2 = logic.conjoin(First, Second, Third)
-    return Final2
-    #util.raiseNotDefined()
+    # Finalmente declaro en final la conjuncion de las tres frases para devolverla.
+    Final = logic.conjoin(First, Second, Third)
+    return Final
 
 def sentence2():
     """Returns a logic.Expr instance that encodes that the following expressions are all true.
@@ -94,20 +95,21 @@ def sentence2():
     (not D) implies C
     """
     "*** YOUR CODE HERE ***"
-    A=logic.Expr('A')
-    B=logic.Expr('B')
-    C=logic.Expr('C')
-    D=logic.Expr('D')
+    # Declaro las cuatro variables a usar en la sentencia.
+    A= logic.Expr('A')
+    B= logic.Expr('B')
+    C= logic.Expr('C')
+    D= logic.Expr('D')
 
+    # Usando las variables declaradas creo las cuatro oraciones que pide el enunciado.
     First= C % (B | D)
     Second= A >> (~B & ~D)
     Third= ~(B & ~C) >> A
     Forth= ~D>>C
 
-
+    # Finalmente declaro en final la conjuncion de las tres frases para devolverla.
     Final = logic.conjoin(First, Second, Third, Forth)
     return Final
-    #util.raiseNotDefined()
 
 def sentence3():
     """Using the symbols WumpusAlive[1], WumpusAlive[0], WumpusBorn[0], and WumpusKilled[0],
@@ -122,22 +124,24 @@ def sentence3():
     The Wumpus is born at time 0.
     """
     "*** YOUR CODE HERE ***"
-    WumpusAlive0=logic.PropSymbolExpr('WumpusAlive',0)
-    WumpusAlive1=logic.PropSymbolExpr('WumpusAlive',1)
-    WumpusBorn0=logic.PropSymbolExpr('WumpusBorn',0)
-    WumpusKilled0=logic.PropSymbolExpr('WumpusKilled',0)
+
+    # Declaro las variables que se usaran en la sentencia.
+    WumpusAlive0= logic.PropSymbolExpr('WumpusAlive',0)
+    WumpusAlive1= logic.PropSymbolExpr('WumpusAlive',1)
+    WumpusBorn0= logic.PropSymbolExpr('WumpusBorn',0)
+    WumpusKilled0= logic.PropSymbolExpr('WumpusKilled',0)
+
+    # Usando las variables declaradas creo las tres oraciones que pide el enunciado.
     First= WumpusAlive1 %((WumpusAlive0 & ~WumpusKilled0) | (~WumpusAlive0 & WumpusBorn0))
     Second= ~(WumpusAlive0 & WumpusBorn0)
     Third= WumpusBorn0
 
+    # Tras esto declaro en final la conjuncion de las tres frases para pasarsela a findModel.
     Final = logic.conjoin(First, Second, Third)
-
     findModel(Final)
+    # Finalmente devuelvo Final.
     return Final
     
-
-    #util.raiseNotDefined()
-
 def modelToString(model):
     """Converts the model to a string for printing purposes. The keys of a model are 
     sorted before converting the model to a string.
@@ -158,7 +162,9 @@ def findModel(sentence):
     model if one exists. Otherwise, returns False.
     """
     "*** YOUR CODE HERE ***"
+    # Declaro to_cnf e introduzco la sentencia pasada a cnf. 
     to_cnf = logic.to_cnf(sentence)
+    # Tras esto creo la variable final en la que introduzco to_cnf para pasarlo alsolucionadorSAT.
     final = logic.pycoSAT(to_cnf)
 
     return final
@@ -183,10 +189,12 @@ def atLeastOne(literals):
     True
     """
     "*** YOUR CODE HERE ***"    
+    # Declaro result que es el primer elemento de literals.(Se asume que si se ha llamado a la funcion al menos hay un elemento en el array).
     result = literals[0]
-    counter=len(literals)
-    for i in range(counter -1):
-        result= logic.disjoin(result, literals[i+1])
+    # Hago disjoin de cada elemento, de esta forma si al menos uno de ellos es verdadero devolverá True.
+    for element in literals:
+        result= logic.disjoin(result, element)
+    # Devuelvo el resultado.
     return result
 
 def atMostOne(literals) :
@@ -196,13 +204,15 @@ def atMostOne(literals) :
     the expressions in the list is true.
     """
     "*** YOUR CODE HERE ***"
-    counter=len(literals)
+    # Creo una varieble que contaŕa el numero de elementos que son verdad y una expresion logica para devolver (A).
     number_of_trues=0
     A=logic.Expr('A')
-    for j in range(counter):
-        if(literals[j]==True):
+    # Por cada elemento compruebo si son True, si lo son sumo el contador.
+    for element in literals:
+        if(element==True):
             number_of_trues+=1
 
+    # Si mas de un elemento es True to_return es A, si no to_return es A negada.
     if(number_of_trues>1):
         to_return= A
     else:
@@ -218,20 +228,21 @@ def exactlyOne(literals):
     "*** YOUR CODE HERE ***"
     
     
-    
-    return logic.conjoin( atLeastOne(literals), atMostOne(literals) )
+    # Si la conjuncion de atLeastOne(literals) y atMostOne(literals) se cumple, significa que solo hay 1 elemento que sea True.
+    return logic.conjoin( atLeastOne(literals), atMostOne(literals))
                    
 def bubbleSort_and_parse(arr): 
-    #Sorts the array passed and makes a new one parsed (contains only the names, not the numbers)
+    # Ordena el array pasado como parametro.
     n = len(arr) 
     for i in range(n-1): 
         for j in range(0, n-i-1): 
             if int(logic.parseExpr(arr[j])[1]) > int(logic.parseExpr(arr[j+1])[1]) : 
                 arr[j], arr[j+1] = arr[j+1], arr[j]     
-
+    # Una vez ordenado,  copia los elementos en sorted_and_parsed[] usando solo el nombre (No el numero).
     sorted_and_parsed=[]
     for i in range(n):
         sorted_and_parsed.append(logic.parseExpr(arr[i])[0])
+    # Finalmente edvuelve el array de nombres ordenado.
     return sorted_and_parsed
 
 
@@ -248,16 +259,20 @@ def extractActionSequence(model, actions):
     ['West', 'South', 'North']
     """
     "*** YOUR CODE HERE ***"
+    # Creo una lista para copiar los elementos validos.
     list_to_copy=[]
-    #Miro todos los elementos del modelo y me quedo con los que sean True, tras esto me quedo solo con los que estén en actions y los copio en un array para ordenarlos.
-    for i in model:
-        if(model.get(i)==True):
-            for j in actions:
-                if(logic.parseExpr(i)[0]==j):
-                    list_to_copy.append(i)
+
+    # Miro todos los elementos del modelo y me quedo con los que sean True, tras esto me quedo solo con los que estén en actions y los copio en un array para ordenarlos.
+    for element in model:
+        if(model.get(element)==True):
+            for action in actions:
+                if(logic.parseExpr(element)[0]==action):
+                    list_to_copy.append(element)
             
-    #Uso bubble sort para ordenarlos ya que al ser tan pocos elementos la diferencia con otros algoritmos es minima
+    # Una vez seleccionados y añadidos a la lista uso bubble sort para ordenarlos,
+    # ya que al ser tan pocos elementos la diferencia con otros algoritmos es minima.
     final_array = bubbleSort_and_parse(list_to_copy)
+    # Finalmente edvuelve el array de nombres ordenado.
     return final_array
 
 
@@ -268,24 +283,26 @@ def pacmanSuccessorStateAxioms(x, y, t, walls_grid):
     Current <==> (previous position at time t-1) & (took action to move to x, y)
     """
     "*** YOUR CODE HERE ***"
-    print("Estoy en ",x," e ",y, " en tiempo ", t)
-    ##como mucho hay 4 posibilidades: arriba abajo izquierda y derecha
+    # Como mucho hay 4 posibilidades: arriba abajo izquierda y derecha, así que va comprobandolas en ese orden.
     
     lista=[]
     if(walls_grid[x][y+1]==False):
-        #significa que no hay una pared encima
+        # Si se cumple esta condicion significa que no hay una pared encima
+        # De esta forma creo temp, un simbo logico que representa que en t-1 estaba en y+1(arriba) y se ha movido hacia abajo (South)
+        # En el resto de condiciones de cprueba lo mismo en las otras direcciones.
         temp=logic.PropSymbolExpr(pacman_str, x, y+1, t-1) & logic.PropSymbolExpr("South", t-1)
+        
         lista.append(temp)
     if(walls_grid[x][y-1]==False):
-        #significa que no hay una pared debajo
+        # Si se cumple esta condicion significa que no hay una pared debajo
         temp=logic.PropSymbolExpr(pacman_str, x, y-1, t-1) & logic.PropSymbolExpr("North", t-1)
         lista.append(temp)
     if(walls_grid[x-1][y]==False):
-        #significa que no hay una pared a la iquierda
+        # Si se cumple esta condicion significa que no hay una pared a la iquierda
         temp=logic.PropSymbolExpr(pacman_str, x-1, y, t-1) & logic.PropSymbolExpr("East", t-1)
         lista.append(temp)
     if(walls_grid[x+1][y]==False):
-        #significa que no hay una pared a la derecha
+        # Si se cumple esta condicion significa que no hay una pared a la derecha
         temp=logic.PropSymbolExpr(pacman_str, x+1, y, t-1)& logic.PropSymbolExpr("West", t-1)
         lista.append(temp)
 
