@@ -284,32 +284,33 @@ def pacmanSuccessorStateAxioms(x, y, t, walls_grid):
     """
     "*** YOUR CODE HERE ***"
     # Como mucho hay 4 posibilidades: arriba abajo izquierda y derecha, así que va comprobandolas en ese orden.
-    
-    lista=[]
+    # Creo una lista de posibilidades
+    posibilities=[]
     if(walls_grid[x][y+1]==False):
         # Si se cumple esta condicion significa que no hay una pared encima
         # De esta forma creo temp, un simbo logico que representa que en t-1 estaba en y+1(arriba) y se ha movido hacia abajo (South)
         # En el resto de condiciones de cprueba lo mismo en las otras direcciones.
         temp=logic.PropSymbolExpr(pacman_str, x, y+1, t-1) & logic.PropSymbolExpr("South", t-1)
-        
-        lista.append(temp)
-    if(walls_grid[x][y-1]==False):
-        # Si se cumple esta condicion significa que no hay una pared debajo
-        temp=logic.PropSymbolExpr(pacman_str, x, y-1, t-1) & logic.PropSymbolExpr("North", t-1)
-        lista.append(temp)
-    if(walls_grid[x-1][y]==False):
-        # Si se cumple esta condicion significa que no hay una pared a la iquierda
-        temp=logic.PropSymbolExpr(pacman_str, x-1, y, t-1) & logic.PropSymbolExpr("East", t-1)
-        lista.append(temp)
-    if(walls_grid[x+1][y]==False):
-        # Si se cumple esta condicion significa que no hay una pared a la derecha
-        temp=logic.PropSymbolExpr(pacman_str, x+1, y, t-1)& logic.PropSymbolExpr("West", t-1)
-        lista.append(temp)
 
-    print(walls_grid)
-    final= logic.PropSymbolExpr(pacman_str, x, y, t) % (logic.disjoin(lista))
-    print(final)
-    return final # Replace this with your expression
+        #Tras esto añado temp a la lista de posibilidades.
+        posibilities.append(temp)
+    if(walls_grid[x][y-1]==False):
+        # Si se cumple esta condicion significa que no hay una pared debajo.
+        temp=logic.PropSymbolExpr(pacman_str, x, y-1, t-1) & logic.PropSymbolExpr("North", t-1)
+        posibilities.append(temp)
+    if(walls_grid[x-1][y]==False):
+        # Si se cumple esta condicion significa que no hay una pared a la iquierda.
+        temp=logic.PropSymbolExpr(pacman_str, x-1, y, t-1) & logic.PropSymbolExpr("East", t-1)
+        posibilities.append(temp)
+    if(walls_grid[x+1][y]==False):
+        # Si se cumple esta condicion significa que no hay una pared a la derecha.
+        temp=logic.PropSymbolExpr(pacman_str, x+1, y, t-1)& logic.PropSymbolExpr("West", t-1)
+        posibilities.append(temp)
+
+    # Finalmente creo en Final la expresion logica pedida y la devuelvo,
+    # teniendo que el pacman esta en x y en ti si y solo si se comple alguna de las posibilidades.
+    Final= logic.PropSymbolExpr(pacman_str, x, y, t) % (logic.disjoin(posibilities))
+    return Final 
 
 
 def positionLogicPlan(problem):
